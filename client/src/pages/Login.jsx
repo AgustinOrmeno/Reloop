@@ -1,26 +1,38 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import authService from '../services/authService'
 
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log('Login:', { email, password })
+    setError('')
+    setLoading(true)
+
+    try {
+      await authService.login({ email, password })
+      navigate('/')
+    } catch (err) {
+      setError(err.response?.data?.error || 'Error al ingresar')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
     <main className="pt-16 min-h-screen bg-beige flex items-center justify-center">
       <div className="w-full max-w-md px-8">
 
-        {/* Logo */}
         <div className="flex items-center gap-2 font-display text-2xl font-bold text-carbon mb-10 justify-center">
           <span className="w-2 h-2 rounded-full bg-terracota inline-block" />
           Reloop
         </div>
 
-        {/* Título */}
         <h1 className="font-display text-4xl font-bold text-carbon mb-2 text-center">
           Bienvenido de vuelta
         </h1>
@@ -28,9 +40,13 @@ export default function Login() {
           Ingresá tu cuenta para continuar
         </p>
 
-        {/* Formulario */}
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded mb-6">
+            {error}
+          </div>
+        )}
 
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
             <label className="text-xs font-medium tracking-widest uppercase text-muted block mb-2">
               Email
@@ -65,21 +81,19 @@ export default function Login() {
 
           <button
             type="submit"
-            className="w-full bg-terracota hover:bg-terracota-dark text-white text-sm font-medium py-4 rounded transition-colors duration-200 mt-2"
+            disabled={loading}
+            className="w-full bg-terracota hover:bg-terracota-dark text-white text-sm font-medium py-4 rounded transition-colors duration-200 mt-2 disabled:opacity-50"
           >
-            Ingresar
+            {loading ? 'Ingresando...' : 'Ingresar'}
           </button>
-
         </form>
 
-        {/* Separador */}
         <div className="flex items-center gap-4 my-8">
           <div className="flex-1 h-px bg-carbon/10" />
           <span className="text-xs text-muted">o</span>
           <div className="flex-1 h-px bg-carbon/10" />
         </div>
 
-        {/* Link a registro */}
         <p className="text-sm text-muted text-center">
           No tenés cuenta?{' '}
           <Link to="/register" className="text-terracota font-medium hover:text-terracota-dark transition-colors duration-200">

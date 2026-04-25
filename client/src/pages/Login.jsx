@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import authService from '../services/authService'
+import { useAuth } from '../context/AuthContext'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -8,14 +8,14 @@ export default function Login() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+  const { login } = useAuth()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
     setLoading(true)
-
     try {
-      await authService.login({ email, password })
+      await login({ email, password })
       navigate('/')
     } catch (err) {
       setError(err.response?.data?.error || 'Error al ingresar')

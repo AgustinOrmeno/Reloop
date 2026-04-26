@@ -8,17 +8,12 @@ const conditions = ['Como nuevo', 'Muy bueno', 'Bueno', 'Aceptable']
 
 export default function PublishItem() {
   const [form, setForm] = useState({
-    title: '',
-    description: '',
-    price: '',
-    category: '',
-    size: '',
-    condition: '',
-    city: '',
+    title: '', description: '', price: '', category: '', city: '',
   })
-
   const [selectedSize, setSelectedSize] = useState('')
   const [selectedCondition, setSelectedCondition] = useState('')
+  const [images, setImages] = useState([])
+  const [previews, setPreviews] = useState([])
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
@@ -26,15 +21,32 @@ export default function PublishItem() {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
+  const handleImageChange = (e, index) => {
+    const file = e.target.files[0]
+    if (!file) return
+    const newImages = [...images]
+    const newPreviews = [...previews]
+    newImages[index] = file
+    newPreviews[index] = URL.createObjectURL(file)
+    setImages(newImages)
+    setPreviews(newPreviews)
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
     try {
+      const validImages = images.filter(Boolean)
+      let imageUrls = []
+      if (validImages.length > 0) {
+        imageUrls = await productService.uploadImages(validImages)
+      }
       await productService.createProduct({
         ...form,
         size: selectedSize,
         condition: selectedCondition,
         price: parseFloat(form.price),
+        images: imageUrls,
       })
       navigate('/explorar')
     } catch (err) {
@@ -55,54 +67,65 @@ export default function PublishItem() {
           <span className="w-6 h-px bg-terracota" />
           Nuevo listado
         </div>
-        <h1 className="font-display text-5xl font-bold text-carbon mb-12">
-          Publicar prenda
-        </h1>
+        <h1 className="font-display text-5xl font-bold text-carbon mb-12">Publicar prenda</h1>
 
         <div className="grid grid-cols-3 gap-16">
-
           <form onSubmit={handleSubmit} className="col-span-2 flex flex-col gap-8">
 
+            {/* Fotos */}
             <div>
-              <label className="text-xs font-medium tracking-widest uppercase text-muted block mb-3">
-                Fotos
-              </label>
+              <label className="text-xs font-medium tracking-widest uppercase text-muted block mb-3">Fotos</label>
               <div className="grid grid-cols-4 gap-3">
-                <div className="aspect-square bg-beige-dark border-2 border-dashed border-carbon/20 rounded-md flex flex-col items-center justify-center cursor-pointer hover:border-terracota transition-colors duration-200 col-span-2 row-span-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 text-muted mb-2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                  </svg>
-                  <p className="text-xs text-muted">Foto principal</p>
-                </div>
+
+                {/* Foto principal */}
+                <label className="aspect-square bg-beige-dark border-2 border-dashed border-carbon/20 rounded-md flex flex-col items-center justify-center cursor-pointer hover:border-terracota transition-colors duration-200 col-span-2 row-span-2 overflow-hidden">
+                  <input type="file" accept="image/*" onChange={(e) => handleImageChange(e, 0)} className="hidden" />
+                  {previews[0] ? (
+                    <img src={previews[0]} alt="preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <>
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 text-muted mb-2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                      </svg>
+                      <p className="text-xs text-muted">Foto principal</p>
+                    </>
+                  )}
+                </label>
+
+                {/* Fotos secundarias */}
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="aspect-square bg-beige-dark border-2 border-dashed border-carbon/20 rounded-md flex items-center justify-center cursor-pointer hover:border-terracota transition-colors duration-200">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-muted">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg>
-                  </div>
+                  <label key={i} className="aspect-square bg-beige-dark border-2 border-dashed border-carbon/20 rounded-md flex items-center justify-center cursor-pointer hover:border-terracota transition-colors duration-200 overflow-hidden">
+                    <input type="file" accept="image/*" onChange={(e) => handleImageChange(e, i)} className="hidden" />
+                    {previews[i] ? (
+                      <img src={previews[i]} alt="preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-muted">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                      </svg>
+                    )}
+                  </label>
                 ))}
               </div>
               <p className="text-xs text-muted mt-2">Agregá hasta 5 fotos. La primera será la principal.</p>
             </div>
 
+            {/* Título */}
             <div>
-              <label className="text-xs font-medium tracking-widest uppercase text-muted block mb-3">
-                Título
-              </label>
+              <label className="text-xs font-medium tracking-widest uppercase text-muted block mb-3">Título</label>
               <input type="text" name="title" value={form.title} onChange={handleChange}
                 placeholder="Ej: Campera de cuero marrón Zara talle M"
                 className="w-full bg-white border border-carbon/15 rounded px-4 py-3 text-sm text-carbon placeholder:text-muted/50 focus:outline-none focus:border-terracota transition-colors duration-200" />
             </div>
 
+            {/* Descripción */}
             <div>
-              <label className="text-xs font-medium tracking-widest uppercase text-muted block mb-3">
-                Descripción
-              </label>
+              <label className="text-xs font-medium tracking-widest uppercase text-muted block mb-3">Descripción</label>
               <textarea name="description" value={form.description} onChange={handleChange}
                 placeholder="Describí el estado, materiales, medidas, etc." rows={5}
                 className="w-full bg-white border border-carbon/15 rounded px-4 py-3 text-sm text-carbon placeholder:text-muted/50 focus:outline-none focus:border-terracota transition-colors duration-200 resize-none" />
             </div>
 
+            {/* Categoría y Ciudad */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-xs font-medium tracking-widest uppercase text-muted block mb-3">Categoría</label>
@@ -122,6 +145,7 @@ export default function PublishItem() {
               </div>
             </div>
 
+            {/* Talle */}
             <div>
               <label className="text-xs font-medium tracking-widest uppercase text-muted block mb-3">Talle</label>
               <div className="flex flex-wrap gap-2">
@@ -136,6 +160,7 @@ export default function PublishItem() {
               </div>
             </div>
 
+            {/* Condición */}
             <div>
               <label className="text-xs font-medium tracking-widest uppercase text-muted block mb-3">Condición</label>
               <div className="flex gap-3">
@@ -150,6 +175,7 @@ export default function PublishItem() {
               </div>
             </div>
 
+            {/* Precio */}
             <div>
               <label className="text-xs font-medium tracking-widest uppercase text-muted block mb-3">Precio</label>
               <div className="relative">
@@ -166,6 +192,7 @@ export default function PublishItem() {
 
           </form>
 
+          {/* Panel lateral */}
           <div className="flex flex-col gap-6">
             <div className="bg-carbon rounded-md p-6">
               <p className="text-xs font-medium tracking-widest uppercase text-white/40 mb-4">Tips para vender más</p>

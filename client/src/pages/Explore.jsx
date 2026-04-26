@@ -1,18 +1,34 @@
+import { useState, useEffect } from 'react'
 import FilterSidebar from '../components/FilterSidebar'
 import ProductCard from '../components/ProductCard'
-
-const products = [
-  { id: 1, name: 'Campera de cuero marrón', brand: 'Zara', city: 'Buenos Aires', price: '$8.500', size: 'M', condition: 'Como nuevo', bg: 'bg-terracota' },
-  { id: 2, name: 'Vestido floral midi', brand: 'H&M', city: 'Córdoba', price: '$4.200', size: 'S', condition: 'Muy bueno', bg: 'bg-carbon-light' },
-  { id: 3, name: 'Blazer oversize gris', brand: 'Mango', city: 'Rosario', price: '$6.800', size: 'L', condition: 'Bueno', bg: 'bg-beige-dark' },
-  { id: 4, name: 'Jean tiro alto azul', brand: 'Levis', city: 'Mendoza', price: '$5.500', size: '28', condition: 'Como nuevo', bg: 'bg-terracota-light' },
-  { id: 5, name: 'Remera vintage negra', brand: 'Sin marca', city: 'Buenos Aires', price: '$2.100', size: 'M', condition: 'Bueno', bg: 'bg-carbon' },
-  { id: 6, name: 'Tapado largo camel', brand: 'Zara', city: 'Córdoba', price: '$12.000', size: 'L', condition: 'Como nuevo', bg: 'bg-terracota-dark' },
-  { id: 7, name: 'Pollera midi estampada', brand: 'H&M', city: 'Rosario', price: '$3.800', size: 'S', condition: 'Muy bueno', bg: 'bg-carbon-mid' },
-  { id: 8, name: 'Zapatillas blancas', brand: 'Adidas', city: 'Buenos Aires', price: '$7.200', size: '39', condition: 'Bueno', bg: 'bg-beige-dark' },
-]
+import productService from '../services/productService'
 
 export default function Explore() {
+  const [products, setProducts] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [filters, setFilters] = useState({})
+
+  const fetchProducts = async (activeFilters = {}) => {
+    setLoading(true)
+    try {
+      const data = await productService.getProducts(activeFilters)
+      setProducts(data)
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchProducts()
+  }, [])
+
+  const handleFilter = (newFilters) => {
+    setFilters(newFilters)
+    fetchProducts(newFilters)
+  }
+
   return (
     <main className="pt-16 min-h-screen bg-beige">
 
@@ -22,24 +38,33 @@ export default function Explore() {
           Marketplace
         </div>
         <div className="flex items-end justify-between">
-          <h1 className="font-display text-5xl font-bold text-carbon">
-            Explorar prendas
-          </h1>
+          <h1 className="font-display text-5xl font-bold text-carbon">Explorar prendas</h1>
           <p className="text-sm text-muted">{products.length} prendas encontradas</p>
         </div>
       </div>
 
       <div className="px-[7%] py-10 flex gap-10">
-        <FilterSidebar />
+        <FilterSidebar onFilter={handleFilter} />
         <div className="flex-1">
-          <div className="grid grid-cols-3 gap-5">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          {loading && (
+            <div className="flex items-center justify-center h-64">
+              <p className="text-sm text-muted">Cargando prendas...</p>
+            </div>
+          )}
+          {!loading && products.length === 0 && (
+            <div className="flex items-center justify-center h-64">
+              <p className="text-sm text-muted">No hay prendas publicadas todavía.</p>
+            </div>
+          )}
+          {!loading && products.length > 0 && (
+            <div className="grid grid-cols-3 gap-5">
+              {products.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          )}
         </div>
       </div>
-
     </main>
   )
 }

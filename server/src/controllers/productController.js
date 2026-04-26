@@ -53,8 +53,11 @@ const getProductById = async (req, res) => {
 
 const createProduct = async (req, res) => {
   try {
-    const { title, description, price, size, condition, category, city } = req.body
+    const { title, description, price, size, condition, category, city, images } = req.body
     const userId = req.userId
+
+    console.log('Datos recibidos:', req.body)
+    console.log('Images recibidas:', images)
 
     if (!title || !price || !size || !condition || !category || !city) {
       return res.status(400).json({ error: 'Faltan campos obligatorios' })
@@ -63,13 +66,13 @@ const createProduct = async (req, res) => {
     const product = await prisma.product.create({
       data: {
         title,
-        description,
-        price: parseFloat(price),
+        description: description || '',
+        price: Number(price),
         size,
         condition,
         category,
         city,
-        images: [],
+        images: images || [],
         userId
       }
     })

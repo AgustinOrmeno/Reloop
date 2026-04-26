@@ -12,7 +12,16 @@ const getProductById = async (id) => {
 }
 
 const createProduct = async (data) => {
-  const response = await api.post('/products', data)
+  const response = await api.post('/products', {
+    title: data.title,
+    description: data.description,
+    price: data.price,
+    size: data.size,
+    condition: data.condition,
+    category: data.category,
+    city: data.city,
+    images: data.images || [],
+  })
   return response.data
 }
 

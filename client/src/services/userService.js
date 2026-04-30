@@ -15,4 +15,15 @@ const getSellerProfile = async (id) => {
   return response.data
 }
 
-export default { getProfile, updateProfile, getSellerProfile }
+
+const getFavorites = async () => {
+  const response = await api.get('/users/favorites')
+  return response.data
+}
+
+const toggleFavorite = async (productId) => {
+  const response = await api.post(`/users/favorites/${productId}`)
+  return response.data
+}
+
+export default { getProfile, updateProfile, getSellerProfile, getFavorites, toggleFavorite }

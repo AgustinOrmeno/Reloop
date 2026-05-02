@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import productService from '../services/productService'
+import { useAuth } from '../context/AuthContext'
 
 export default function ProductDetail() {
   const { id } = useParams()
+  const navigate = useNavigate()
+  const { user } = useAuth()
   const [product, setProduct] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -22,6 +25,14 @@ export default function ProductDetail() {
     }
     fetchProduct()
   }, [id])
+
+  const handleContact = () => {
+    if (!user) {
+      navigate('/login')
+      return
+    }
+    navigate(`/chat?productId=${product.id}&sellerId=${product.user.id}`)
+  }
 
   if (loading) return (
     <main className="pt-16 min-h-screen bg-beige flex items-center justify-center">
@@ -182,12 +193,20 @@ export default function ProductDetail() {
                     <p className="text-xs text-muted">Reputación</p>
                   </div>
                 </div>
-                <Link
-                  to={`/vendedor/${product.user.id}`}
-                  className="block w-full mt-4 border border-carbon/20 text-carbon text-sm font-medium py-2.5 rounded hover:border-carbon transition-colors duration-200 text-center"
-                >
-                  Ver perfil del vendedor
-                </Link>
+                <div className="flex flex-col gap-2 mt-4">
+                  <button
+                    onClick={handleContact}
+                    className="w-full bg-terracota hover:bg-terracota-dark text-white text-sm font-medium py-2.5 rounded transition-colors duration-200"
+                  >
+                    Contactar vendedor
+                  </button>
+                  <Link
+                    to={`/vendedor/${product.user.id}`}
+                    className="block w-full border border-carbon/20 text-carbon text-sm font-medium py-2.5 rounded hover:border-carbon transition-colors duration-200 text-center"
+                  >
+                    Ver perfil del vendedor
+                  </Link>
+                </div>
               </div>
             )}
           </div>

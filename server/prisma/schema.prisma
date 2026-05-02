@@ -17,11 +17,12 @@ model User {
   rating    Float    @default(0)
   createdAt DateTime @default(now())
 
-  products  Product[]
-  orders    Order[]
-  messages  Message[]
-  reviews   Review[]
-  favorites Favorite[]
+  products        Product[]
+  orders          Order[]
+  sentMessages    Message[] @relation("MessageSender")
+  receivedMessages Message[] @relation("MessageReceiver")
+  reviews         Review[]
+  favorites       Favorite[]
 }
 
 model Product {
@@ -58,15 +59,19 @@ model Order {
 }
 
 model Message {
-  id        Int      @id @default(autoincrement())
-  text      String
-  createdAt DateTime @default(now())
+  id         Int      @id @default(autoincrement())
+  text       String
+  read       Boolean  @default(false)
+  createdAt  DateTime @default(now())
 
-  senderId  Int
-  sender    User    @relation(fields: [senderId], references: [id])
+  senderId   Int
+  sender     User    @relation("MessageSender", fields: [senderId], references: [id])
 
-  productId Int
-  product   Product @relation(fields: [productId], references: [id])
+  receiverId Int
+  receiver   User    @relation("MessageReceiver", fields: [receiverId], references: [id])
+
+  productId  Int
+  product    Product @relation(fields: [productId], references: [id])
 }
 
 model Review {

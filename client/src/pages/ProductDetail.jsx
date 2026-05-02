@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import productService from '../services/productService'
 import { useAuth } from '../context/AuthContext'
+import { formatPrice } from '../utils/formatPrice'
 
 export default function ProductDetail() {
   const { id } = useParams()
@@ -59,13 +60,11 @@ export default function ProductDetail() {
           <span className="text-carbon">{product.title}</span>
         </div>
 
-        {/* Contenido principal */}
         <div className="grid grid-cols-2 gap-16">
 
           {/* Imágenes */}
           <div className="flex flex-col gap-3">
 
-            {/* Foto principal con flechas */}
             <div className="bg-beige-dark rounded-md aspect-square relative overflow-hidden group">
               {product.images && product.images.length > 0 ? (
                 <img
@@ -83,7 +82,6 @@ export default function ProductDetail() {
                 {product.condition}
               </div>
 
-              {/* Flechas */}
               {product.images && product.images.length > 1 && (
                 <>
                   <button
@@ -103,7 +101,6 @@ export default function ProductDetail() {
                     </svg>
                   </button>
 
-                  {/* Indicadores */}
                   <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
                     {product.images.map((_, i) => (
                       <button
@@ -119,7 +116,6 @@ export default function ProductDetail() {
               )}
             </div>
 
-            {/* Miniaturas */}
             {product.images && product.images.length > 1 && (
               <div className="flex gap-2">
                 {product.images.map((img, i) => (
@@ -147,7 +143,7 @@ export default function ProductDetail() {
                 {product.title}
               </h1>
               <div className="font-display text-5xl font-bold text-carbon mb-6">
-                ${product.price}
+                {formatPrice(product.price)}
               </div>
               <div className="flex gap-3 mb-8">
                 <div className="border border-carbon/20 rounded px-4 py-2 text-sm text-carbon">
@@ -172,7 +168,6 @@ export default function ProductDetail() {
               </div>
             </div>
 
-            {/* Card del vendedor */}
             {product.user && (
               <div className="border border-carbon/10 rounded-md p-5">
                 <p className="text-xs font-medium tracking-widest uppercase text-muted mb-4">

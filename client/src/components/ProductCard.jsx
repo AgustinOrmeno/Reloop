@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import userService from '../services/userService'
 import { useAuth } from '../context/AuthContext'
+import { formatPrice } from '../utils/formatPrice'
 
 export default function ProductCard({ product, initialFavorited = false }) {
   const { user } = useAuth()
@@ -56,7 +57,7 @@ export default function ProductCard({ product, initialFavorited = false }) {
       <p className="text-sm font-medium text-carbon mb-1 truncate">{product.title || product.name}</p>
       <p className="text-xs text-muted mb-2">{product.user?.name} · {product.city}</p>
       <div className="flex items-center justify-between">
-        <span className="font-display text-lg font-bold text-carbon">${product.price}</span>
+        <span className="font-display text-lg font-bold text-carbon">{formatPrice(product.price)}</span>
         <span className="text-xs text-muted bg-beige-dark px-2 py-1 rounded">{product.size}</span>
       </div>
 

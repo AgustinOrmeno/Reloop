@@ -10,6 +10,7 @@ import PublishItem from './pages/PublishItem'
 import UserProfile from './pages/UserProfile'
 import SellerProfile from './pages/SellerProfile'
 import Chat from './pages/Chat'
+import NotFound from './pages/NotFound'
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
         <Route path="/perfil" element={<UserProfile />} />
         <Route path="/vendedor/:id" element={<SellerProfile />} />
         <Route path="/chat" element={<Chat />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />
     </BrowserRouter>
